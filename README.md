@@ -3,7 +3,7 @@
 Modern JavaScript Curriculum
 ========
 
-##Objective
+## Objective
 Refactor an application to use modern JavaScript from ES5.
 
 ## Instructions
