@@ -1,49 +1,63 @@
-var React = require('react');
-var Forecast = require('../components/Forecast');
-var getForcast = require('../helpers/api').getForcast;
+import React from 'react'
+import Forecast from '../components/Forecast'
+import { getForcast } from '../helpers/api'
+import PropTypes from 'prop-types'
 
-var ForecastContainer = React.createClass({
-  contextTypes: {
-    router: React.PropTypes.object.isRequired
-  },
-  getInitialState: function () {
-    return {
+
+class ForecastContainer extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
       isLoading: true,
       forecastData: {}
     }
-  },
-  componentDidMount: function () {
+  }
+  componentDidMount () {
     this.makeRequest(this.props.routeParams.city)
-  },
-  componentWillReceiveProps: function (nextProps) {
+  }
+  componentWillReceiveProps(nextProps) {
     this.makeRequest(nextProps.routeParams.city)
-  },
-  makeRequest: function (city) {
-    getForcast(city)
-      .then(function (forecastData) {
-        this.setState({
-          isLoading: false,
-          forecastData: forecastData
-        });
-      }.bind(this));
-  },
-  handleClick: function (weather) {
+  }
+
+  async makeRequest(city) {
+    try {
+      const forecastData = await getForcast(city)
+      this.setState({
+        isLoading: false,
+        forecastData: forecastData
+      })
+    } catch (e) {
+      console.warn("Error in ForecastContainer:", e)
+    }
+  }
+
+  handleClick(weather) {
+    console.log(this)
     this.context.router.push({
       pathname: '/detail/' + this.props.routeParams.city,
       state: {
         weather: weather
       }
     })
-  },
-  render: function () {
+  }
+  render() {
+    const {isLoading, forecastData} = this.state
     return (
       <Forecast
         city={this.props.routeParams.city}
-        isLoading={this.state.isLoading}
-        handleClick={this.handleClick}
-        forecastData={this.state.forecastData} />
+        isLoading={isLoading}
+        handleClick={(weather) => this.handleClick(weather)}
+        forecastData={forecastData} />
     )
   }
-});
+}
 
-module.exports = ForecastContainer;
+ForecastContainer.propTypes = {
+  routeParams: PropTypes.object.isRequired
+}
+
+ForecastContainer.contextTypes = {
+  router: React.PropTypes.object.isRequired
+}
+
+export default ForecastContainer
